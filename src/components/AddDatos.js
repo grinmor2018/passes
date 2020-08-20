@@ -1,122 +1,209 @@
-import React, {Component} from 'react';
-import Navigation from './Navigation';
+import React, { Component } from "react";
+import db from "../FirestoreConfig";
+import { Button, Table } from "react-bootstrap";
 
 class AddDatos extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      web: "",
+      user: "",
+      password: "",
+      email: "",
+      clave: "",
+      observaciones: "",
+      data: []
+    };
+    this.handleInput = this.handleInput.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-	constructor(props){
-		super(props);
-		this.state= {
-	    	web:"",
-	    	user:"",
-	    	password:"",
-	    	email:"",
-	    	clave:"",
-	    	observaciones:""
-		};
-		this.handleInput= this.handleInput.bind(this);
-		this.handleSubmit= this.handleSubmit.bind(this);
-	}
+  readDocs() {
+    db.collection("Item")
+      .get()
+      .then(
+        snapShots => {
+          this.setState({
+            data: snapShots.docs.map(doc => {
+              return {
+                id: doc.id,
+                web: doc.data().web,
+                user: doc.data().user,
+                password: doc.data().password,
+                email: doc.data().email,
+                clave: doc.data().clave,
+                observaciones: doc.data().observaciones
+              };
+            })
+          });
+        },
+        error => {
+          console.log(error);
+        }
+      );
+  }
 
-	handleInput(e){
-		const { value, name} = e.target;
-		this.setState({
-			[name]: value
-		})
-	}
+  componentDidMount() {
+    this.readDocs();
+  }
 
-	handleSubmit(e){
-		e.preventDefault();
-		this.props.onAddDato(this.state);
-    	this.setState({
-	    	web:"",
-	    	user:"",
-	    	password:"",
-	    	email:"",
-	    	clave:"",
-	    	observaciones:""
-    	});
-	}
+  handleInput(e) {
+    const { value, name } = e.target;
+    this.setState({
+      [name]: value
+    });
+  }
 
-	render(){
-		return(
-			<div className="container">
-					<Navigation />
-					<h2>Añadir datos</h2>
-					<form className="add-form" onSubmit={this.handleSubmit}>
-						<div className="line-form">
-							<div className="rotulo-form">Web</div>
-							<input
-								type="text"
-					            name="web"
-					            className="input-form"
-					            onChange= { this.handleInput}
-					            value= {this.state.web}
-					            placeholder="Web"
-							/>
-						</div>
-						<div className="line-form">
-							<div className="rotulo-form">Usuario</div>
-							<input
-								type="text"
-					            name="user"
-					            className="input-form"
-					            onChange= { this.handleInput}
-					            value= {this.state.user}
-					            placeholder="Usuario"
-							/>
-						</div>
-						<div className="line-form">
-							<div className="rotulo-form">Contraseña</div>
-							<input
-								type="text"
-					            name="password"
-					            className="input-form"
-					            onChange= { this.handleInput}
-					            value= {this.state.password}
-					            placeholder="Password"
-							/>
-						</div>
-						<div className="line-form">
-						<div className="rotulo-form">Correo</div>
-							<input
-								type="text"
-					            name="email"
-					            className="input-form"
-					            onChange= { this.handleInput}
-					            value= {this.state.email}
-					            placeholder="Email"
-							/>
-						</div>
-						<div className="line-form">
-						<div className="rotulo-form">Clave</div>
-							<input
-								type="text"
-					            name="clave"
-					            className="input-form"
-					            onChange= { this.handleInput}
-					            value= {this.state.clave}
-					            placeholder="Clave"
-							/>
-						</div>
-						<div className="line-form">
-						<div className="rotulo-form">Observaciones</div>
-							<input
-								type="text"
-					            name="observaciones"
-					            className="input-form"
-					            onChange= { this.handleInput}
-					            value= {this.state.observaciones}
-					            placeholder="Observaciones "
-							/>
-						</div>
-						<p></p>
-						<button type="submit" className="add-btn">
-            				SAVE
-          				</button>
-					</form>
-			</div>
-		);
-	}
+  handleSubmit(e) {
+    var opcion = window.confirm(
+      "Añadir " + JSON.stringify(this.state.web + ":" + this.state.user) + "??"
+    );
+    e.preventDefault();
+    if (opcion === true) {
+      this.props.onAddDato(this.state);
+      this.setState({
+        web: "",
+        user: "",
+        password: "",
+        email: "",
+        clave: "",
+        observaciones: ""
+      });
+      this.readDocs();
+    } else {
+      alert("Has cancelado");
+    }
+  }
+
+  render() {
+    return (
+      <div class="container-fluid">
+        <div class="bg-success my-2">
+          <h2>Añadir datos</h2>
+        </div>
+        <form onSubmit={this.handleSubmit}>
+          <div class="row">
+            <div class="col">
+              <div class="form-group">
+                <label for="formGroupWeb">Web</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="web"
+                  id="formWeb"
+                  placeholder="Enter Web"
+                  onChange={this.handleInput}
+                  value={this.state.web}
+                />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="formGroupUser">User</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="user"
+                  id="formUser"
+                  placeholder="Enter user"
+                  onChange={this.handleInput}
+                  value={this.state.user}
+                />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="formGroupPassword">Password</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="password"
+                  id="formPassword"
+                  placeholder="Enter Password"
+                  onChange={this.handleInput}
+                  value={this.state.password}
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="form-group">
+                <label for="formGroupEmail">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  id="formEmail"
+                  placeholder="Enter Web"
+                  onChange={this.handleInput}
+                  value={this.state.email}
+                />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="formGroupClave">Clave</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="clave"
+                  id="formClave"
+                  placeholder="Enter Clave"
+                  onChange={this.handleInput}
+                  value={this.state.clave}
+                />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="formGroupObservaciones">Observaciones</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="observaciones"
+                  id="formObservaciones"
+                  placeholder="Enter Observaciones"
+                  onChange={this.handleInput}
+                  value={this.state.observaciones}
+                />
+              </div>
+            </div>
+          </div>
+          <Button variant="success " type="submit">
+            SAVE
+          </Button>
+        </form>
+        <p></p>
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Web</th>
+              <th>Usuario</th>
+              <th>Password</th>
+              <th>Email</th>
+              <th>Clave</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.data.map((row, i) => (
+              <tr key={i}>
+                <td>{i + 1}</td>
+                <td>{row.web}</td>
+                <td>{row.user}</td>
+                <td>{row.password}</td>
+                <td>{row.email}</td>
+                <td>{row.clave}</td>
+                <td>{row.observaciones}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    );
+  }
 }
 
 export default AddDatos;
